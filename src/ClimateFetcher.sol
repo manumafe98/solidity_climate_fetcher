@@ -11,8 +11,8 @@ import {AutomationCompatibleInterface} from "@chainlink/contracts/src/v0.8/autom
  * @author Manuel Maxera.
  * @notice By laveraging Chainlink Functions calls openweathermap Api to get the city current weather.
  * @notice By laveraginh Chainlink Automation we schedule calls to the openweathermap Api with Buenos Aires as default city.
- * Add deployer contract
  * Add NatSpec to functions
+ * Check how to manage secrets correctly, and how to execute sendRequest automatically when managing secrets with the DON
  * Add testing with mocks -> FunctionsV1EventsMock
  */
 contract ClimateFetcher is FunctionsClient, AutomationCompatibleInterface, ConfirmedOwner {
@@ -27,7 +27,6 @@ contract ClimateFetcher is FunctionsClient, AutomationCompatibleInterface, Confi
     bytes32 private s_lastRequestId;
     uint32 private s_gasLimit;
     uint64 private s_subscriptionId;
-    bytes s_encryptedSecret;
 
     string private s_weather;
     bytes private s_lastResponse;
@@ -50,14 +49,12 @@ contract ClimateFetcher is FunctionsClient, AutomationCompatibleInterface, Confi
         bytes32 donId,
         uint32 gasLimit,
         uint64 subscriptionId,
-        bytes memory encryptedSecret,
         uint256 interval
     ) FunctionsClient(router) ConfirmedOwner(msg.sender) {
         s_router = router;
         s_donId = donId;
         s_gasLimit = gasLimit;
         s_subscriptionId = subscriptionId;
-        s_encryptedSecret = encryptedSecret;
         s_interval = interval;
         s_lastTimeStamp = block.timestamp;
     }
@@ -130,10 +127,6 @@ contract ClimateFetcher is FunctionsClient, AutomationCompatibleInterface, Confi
 
     function getSubscriptionId() external view returns (uint64 subscriptionId) {
         subscriptionId = s_subscriptionId;
-    }
-
-    function getEncryptedSecret() external view returns (bytes memory encryptedSecret) {
-        encryptedSecret = s_encryptedSecret;
     }
 
     function getWeather() external view returns (string memory weather) {
