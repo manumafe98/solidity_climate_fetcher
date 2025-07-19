@@ -36,10 +36,26 @@ contract ClimateFetcherTest is Test, CodeConstants {
 
     function testRouterIsMockWhenLocal() public view skipWhenSepolia {
         assertNotEq(climateFetcher.getRouter(), SEPOLIA_ROUTER);
+        assertEq(climateFetcher.getRouter(), address(mockOracle));
     }
 
     function testIsSepoliaRouter() public view skipWhenLocal {
         assertEq(climateFetcher.getRouter(), SEPOLIA_ROUTER);
+    }
+
+    function testSendRequestCreatesValidRequest() public skipWhenSepolia {
+        string[] memory args = new string[](1);
+        args[0] = "Buenos Aires";
+
+        vm.prank(climateFetcher.owner());
+        bytes32 requestId = climateFetcher.sendRequest(args);
+
+        assertTrue(mockOracle.requestExists(requestId));
+
+        MockOracle.Request memory request = mockOracle.getRequest(requestId);
+        assertEq(request.consumer, address(climateFetcher));
+        assertEq(request.requestId, requestId);
+        assertFalse(request.fulfilled);
     }
 
     function testFulfillSetsResult() public skipWhenSepolia {
@@ -61,5 +77,35 @@ contract ClimateFetcherTest is Test, CodeConstants {
 
         MockOracle.Request memory request = mockOracle.getRequest(requestId);
         assertTrue(request.fulfilled);
+    }
+
+    function testFulfillWithError() public skipWhenSepolia {
+        string[] memory args = new string[](1);
+        args[0] = "InvalidCity";
+
+        vm.prank(climateFetcher.owner());
+        bytes32 requestId = climateFetcher.sendRequest(args);
+
+        bytes memory response = abi.encode("InvalidResponse");
+        bytes memory err = abi.encode("404: City not found");
+
+        mockOracle.fulfillRequest(requestId, response, err);
+
+        assertEq(climateFetcher.getLastError(), err);
+        assertEq(climateFetcher.getLastResponse(), response);
+    }
+
+    function testSendInvalidRequestIdReverts() public skipWhenSepolia {
+        string[] memory args = new string[](1);
+        args[0] = "Test";
+
+        vm.prank(climateFetcher.owner());
+        climateFetcher.sendRequest(args);
+
+        bytes memory response = abi.encode("");
+        bytes memory err = abi.encode("");
+
+        vm.expectRevert(abi.encodeWithSelector(MockOracle.MockOracle__InvalidRequest.selector));
+        mockOracle.fulfillRequest(bytes32(abi.encode(5)), response, err);
     }
 }
