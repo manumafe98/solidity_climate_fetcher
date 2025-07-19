@@ -1,5 +1,5 @@
 const { SecretsManager } = require("@chainlink/functions-toolkit");
-const ethers = require("ethers"); // ethers v5
+const ethers = require("ethers");
 require("@chainlink/env-enc").config();
 
 const encryptSecretGist = async () => {
@@ -16,8 +16,6 @@ const encryptSecretGist = async () => {
   if (!rpcUrl)
     throw new Error(`rpcUrl not provided  - check your environment variables`);
 
-  const secrets = { SOLIDITY_API_KEY: process.env.OPENWEATHER_API_KEY };
-
   const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
   const wallet = new ethers.Wallet(privateKey, provider);
 
@@ -28,10 +26,12 @@ const encryptSecretGist = async () => {
   });
   await secretsManager.initialize();
 
-  const encryptedSecretsObj = await secretsManager.encryptSecrets(secrets);
+  const encryptedSecretsUrls = await secretsManager.encryptSecretsUrls([
+    process.env.OPENWEATHER_API_KEY_GIST,
+  ]);
 
-  console.log(`Secret encrypted:`, encryptedSecretsObj);
-};
+  console.log(`Encrypted Secrets url result: ${encryptedSecretsUrls}`);
+}
 
 encryptSecretGist().catch((e) => {
   console.error(e);
