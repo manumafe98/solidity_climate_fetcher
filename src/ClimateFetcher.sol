@@ -96,7 +96,7 @@ contract ClimateFetcher is FunctionsClient, AutomationCompatibleInterface, Confi
         }
 
         s_lastResponse = response;
-        s_weather = string(response);
+        s_weather = abi.decode(response, (string));
         s_lastError = err;
 
         emit Response(requestId, s_weather, s_lastResponse, s_lastError);

@@ -6,7 +6,7 @@ import {ClimateFetcher} from "../src/ClimateFetcher.sol";
 import {HelperConfig} from "./HelperConfig.s.sol";
 
 contract DeployClimateFetcher is Script {
-    function run() public returns (ClimateFetcher) {
+    function run() public returns (ClimateFetcher, HelperConfig.NetworkConfig memory) {
         HelperConfig helperConfig = new HelperConfig();
         HelperConfig.NetworkConfig memory config = helperConfig.getConfig();
 
@@ -21,6 +21,6 @@ contract DeployClimateFetcher is Script {
         });
         vm.stopBroadcast();
 
-        return climateFetcher;
+        return (climateFetcher, config);
     }
 }
