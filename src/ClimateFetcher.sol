@@ -35,6 +35,7 @@ contract ClimateFetcher is FunctionsClient, AutomationCompatibleInterface, Confi
 
     uint256 private s_lastTimeStamp;
     uint256 private s_interval;
+    bytes private s_encryptedSecret;
 
     string constant SOURCE = "const city = args[0];" "if (!secrets.SOLIDITY_API_KEY) {"
         "  throw Error('API key required');" "}" "const config = {"
@@ -49,6 +50,7 @@ contract ClimateFetcher is FunctionsClient, AutomationCompatibleInterface, Confi
         bytes32 donId,
         uint32 gasLimit,
         uint64 subscriptionId,
+        bytes memory encryptedSecret,
         uint256 interval
     ) FunctionsClient(router) ConfirmedOwner(msg.sender) {
         s_router = router;
@@ -56,6 +58,7 @@ contract ClimateFetcher is FunctionsClient, AutomationCompatibleInterface, Confi
         s_gasLimit = gasLimit;
         s_subscriptionId = subscriptionId;
         s_interval = interval;
+        s_encryptedSecret = encryptedSecret;
         s_lastTimeStamp = block.timestamp;
     }
 
