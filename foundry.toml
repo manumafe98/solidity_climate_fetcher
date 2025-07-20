@@ -3,3 +3,6 @@ src = "src"
 out = "out"
 libs = ["lib"]
 remappings = ['@chainlink/=lib/chainlink/']
+
+[etherscan]
+sepolia = { key = "${ETHERSCAN_API_KEY}" }
