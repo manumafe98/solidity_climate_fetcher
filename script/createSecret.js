@@ -1,10 +1,12 @@
-const { SecretsManager } = require("@chainlink/functions-toolkit");
+const { SecretsManager, createGist } = require("@chainlink/functions-toolkit");
 const ethers = require("ethers");
 require("@chainlink/env-enc").config();
 
 const encryptSecretGist = async () => {
   const routerAddress = "0xb83E47C2bC239B3bf370bc41e1459A34b41238D0";
   const donId = "fun-ethereum-sepolia-1";
+  const secrets = { SOLIDITY_API_KEY: process.env.OPENWEATHER_API_KEY };
+  const githubApiToken = process.env.GITHUB_API_TOKEN;
 
   const privateKey = process.env.PRIVATE_KEY;
   if (!privateKey)
@@ -26,11 +28,24 @@ const encryptSecretGist = async () => {
   });
   await secretsManager.initialize();
 
+  const encryptedSecretsObj = await secretsManager.encryptSecrets(secrets);
+
+  console.log("Creating gist...");
+
+  const gistURL = await createGist(
+    githubApiToken,
+    JSON.stringify(encryptedSecretsObj)
+  );
+
+  console.log(`\n✅Gist created ${gistURL} . Encrypt the URLs..`);
+
+  console.log("\nEncryipting gist...");
+
   const encryptedSecretsUrls = await secretsManager.encryptSecretsUrls([
-    process.env.OPENWEATHER_API_KEY_GIST,
+    gistURL,
   ]);
 
-  console.log(`Encrypted Secrets url result: ${encryptedSecretsUrls}`);
+  console.log(`\n✅Encrypted Secrets url result: ${encryptedSecretsUrls}`);
 }
 
 encryptSecretGist().catch((e) => {

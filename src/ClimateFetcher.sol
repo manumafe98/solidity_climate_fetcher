@@ -91,6 +91,33 @@ contract ClimateFetcher is FunctionsClient, AutomationCompatibleInterface, Confi
     }
 
     /**
+     * @notice Updates the encrypted secrets reference used for API calls.
+     * @dev Only callable by the contract owner.
+     * @param newEncryptedSecret The new encrypted secrets data as bytes.
+     */
+    function setEncryptedSecret(bytes memory newEncryptedSecret) external onlyOwner {
+        s_encryptedSecret = newEncryptedSecret;
+    }
+
+    /**
+     * @notice Updates the Chainlink Functions subscription ID.
+     * @dev Only callable by the contract owner.
+     * @param newSubscriptionId The new subscription ID.
+     */
+    function setSubscriptionId(uint64 newSubscriptionId) external onlyOwner {
+        s_subscriptionId = newSubscriptionId;
+    }
+
+    /**
+     * @notice Updates the gas limit for the Chainlink Functions callback.
+     * @dev Only callable by the contract owner.
+     * @param newGasLimit The new gas limit for the fulfillment callback.
+     */
+    function setGasLimit(uint32 newGasLimit) external onlyOwner {
+        s_gasLimit = newGasLimit;
+    }
+
+    /**
      * @notice Sends a request to Chainlink Functions to fetch weather data for a given city.
      * @dev Only callable by the contract owner. Constructs and sends an inline JavaScript request.
      * @param args An array of strings, where the first element is the city name.
@@ -216,6 +243,14 @@ contract ClimateFetcher is FunctionsClient, AutomationCompatibleInterface, Confi
      */
     function getLastTimestamp() external view returns (uint256 lastTimeStamp) {
         lastTimeStamp = s_lastTimeStamp;
+    }
+
+    /**
+     * @notice Gets the currently configured encrypted secrets reference.
+     * @return encryptedSecret The encrypted secrets data as bytes.
+     */
+    function getEncryptedSecret() external view returns (bytes memory encryptedSecret) {
+        encryptedSecret = s_encryptedSecret;
     }
 
     /**
